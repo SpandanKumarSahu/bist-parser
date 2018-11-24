@@ -33,8 +33,8 @@ if __name__ == '__main__':
     parser.add_option("--predict", action="store_true", dest="predictFlag", default=False)
     parser.add_option("--bibi-lstm", action="store_true", dest="bibiFlag", default=False)
     parser.add_option("--disablecostaug", action="store_false", dest="costaugFlag", default=True)
-    parser.add_option("--non-projective", action="store_true", dest="parser_type", default=False)
-
+     parser.add_option("--non-projective", action="store_true", dest="parser_type", default=False)
+     
     (options, args) = parser.parse_args()
     max_thread = multiprocessing.cpu_count()
     active_thread = options.numthread if max_thread>options.numthread else max_thread
@@ -73,14 +73,14 @@ if __name__ == '__main__':
                         print('LAS:%s' % l.strip().split()[-1])
     else:
         print('Preparing vocab')
-        words, w2i, pos, rels = list(utils.vocab(options.conll_train))
+        words, w2i, pos, rels, morph_feats = list(utils.vocab(options.conll_train))
 
         with open(os.path.join(options.output, options.params), 'wb') as paramsfp:
-            pickle.dump((words, w2i, pos, rels, options), paramsfp)
+            pickle.dump((words, w2i, pos, rels, morph_feats, options), paramsfp)
         print('Finished collecting vocab')
 
         print('Initializing lstm mstparser:')
-        parser = mstlstm.MSTParserLSTM(words, pos, rels, w2i, options)
+        parser = mstlstm.MSTParserLSTM(words, pos, rels, w2i, morph_feats, options)
         for epoch in range(options.epochs):
             print('Starting epoch', epoch)
             parser.train(options.conll_train)
