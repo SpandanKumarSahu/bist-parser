@@ -1,5 +1,5 @@
 import numpy as np
-from dependency_decoding import chu_liu_edmonds
+# from dependency_decoding import chu_liu_edmonds
 
 
 # def parse_proj(scores):

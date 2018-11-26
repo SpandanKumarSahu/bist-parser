@@ -240,10 +240,24 @@ class MSTParserLSTMModel(nn.Module):
         for entry in sentence:
             wordvec = self.wlookup(scalar(int(self.vocab.get(entry.norm, 0)))) if self.wdims > 0 else None
             posvec = self.plookup(scalar(int(self.pos[entry.pos]))) if self.pdims > 0 else None
-            evec = self.elookup(scalar(int(self.extrnd.get(entry.form, self.extrnd.get(entry.norm,
+            morph_vecs = {}
+            for feat in self.morph_feats.keys():
+                if feat in entry.feats.keys():
+                    morph_vecs[feat] = self.morph_lookup[feat](scalar(int(self.morph_feats[feat][entry.feats[feat]])).cpu())
+                else:
+                    morph_vecs[feat] = self.morph_lookup[feat](scalar(0).cpu())
+            morph_vec = None
+            for feat in sorted(morph_vecs.keys()):
+                if use_gpu:
+                    morph_vec = cat([morph_vec, morph_vecs[feat].cuda()])
+                else:
+                    morph_vec = cat([morph_vec, morph_vecs[feat]])
+            evec = None
+            if self.external_embedding is not None:
+                evec = self.elookup(scalar(int(self.extrnd.get(entry.form, self.extrnd.get(entry.norm,
                                                                                        0))))) if self.external_embedding is not None else None
-            entry.vec = cat([wordvec, posvec, evec])
-
+            entry.vec = cat([wordvec, posvec, evec, morph_vec])
+            
             entry.lstms = [entry.vec, entry.vec]
             entry.headfov = None
             entry.modfov = None
@@ -309,7 +323,10 @@ class MSTParserLSTMModel(nn.Module):
                     morph_vecs[feat] = self.morph_lookup[feat](scalar(0).cpu())
             morph_vec = None
             for feat in sorted(morph_vecs.keys()):
-                morph_vec = cat([morph_vec, morph_vecs[feat].cuda()])
+                if use_gpu:
+                    morph_vec = cat([morph_vec, morph_vecs[feat].cuda()])
+                else:
+                    morph_vec = cat([morph_vec, morph_vecs[feat]])
             evec = None
             if self.external_embedding is not None:
                 evec = self.elookup(scalar(self.extrnd.get(entry.form, self.extrnd.get(entry.norm, 0)) if (
