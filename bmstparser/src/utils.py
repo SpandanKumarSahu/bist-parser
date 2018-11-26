@@ -29,8 +29,7 @@ class ConllEntry:
     def __str__(self):
         values = [str(self.id), self.form, self.lemma, self.pos, self.cpos, self.feats, \
         str(self.pred_parent_id) if self.pred_parent_id is not None else None, self.pred_relation, self.deps, self.misc]
-        return '\t'.join(['_' if v is None else v for v in values])
-
+        return '\t'.join(['_' if v is None else "".join([str(idx)+'='+str(v[idx])+'|' for idx in v.keys()])[:-1] if type(v) is dict else v for v in values])
 
 def vocab(conll_path):
     wordsCount = Counter()
