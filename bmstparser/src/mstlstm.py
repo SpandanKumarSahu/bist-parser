@@ -10,6 +10,7 @@ import utils, time, random, non_projective_CLE_decoder, projective_eisenbergy_de
 import numpy as np
 import pdb
 import os
+from torchnlp.word_to_vector import CharNGram
 
 use_gpu = True if torch.cuda.is_available() else False
 
@@ -89,6 +90,7 @@ class MSTParserLSTMModel(nn.Module):
         self.rels = {word: ind for ind, word in enumerate(rels)}
         self.irels = rels
         self.morph_feats = {}
+        vectors = CharNGram()
 
         for feat in morph_feats.keys():
             # TODO
@@ -102,6 +104,9 @@ class MSTParserLSTMModel(nn.Module):
             external_embedding_fp.readline()
             self.external_embedding = {line.split(' ')[0]: [float(f) for f in line.strip().split(' ')[1:]] for line in
                                        external_embedding_fp}
+            #print(type(list(vectors["A"])))
+            for key in self.external_embedding:
+                self.external_embedding[key] += list(vectors[key])
             external_embedding_fp.close()
 
             self.edim = len(list(self.external_embedding.values())[0])
@@ -257,7 +262,7 @@ class MSTParserLSTMModel(nn.Module):
                 evec = self.elookup(scalar(int(self.extrnd.get(entry.form, self.extrnd.get(entry.norm,
                                                                                        0))))) if self.external_embedding is not None else None
             entry.vec = cat([wordvec, posvec, evec, morph_vec])
-            
+
             entry.lstms = [entry.vec, entry.vec]
             entry.headfov = None
             entry.modfov = None

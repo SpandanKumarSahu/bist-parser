@@ -37,11 +37,11 @@ def vocab(conll_path):
     relCount = Counter()
     morph_feats = {}
     with open(conll_path, 'r') as conllFP:
-        for idx, sentence in enumerate(read_conll(conllFP)):
+        for sentence in read_conll(conllFP):
             wordsCount.update([node.norm for node in sentence if isinstance(node, ConllEntry)])
             posCount.update([node.pos for node in sentence if isinstance(node, ConllEntry)])
             relCount.update([node.relation for node in sentence if isinstance(node, ConllEntry)])
-            for idx2, node in enumerate(sentence):
+            for node in sentence:
                 for feats in node.feats.keys():
                     morph_feats[feats] = list(set(morph_feats.get(feats, []) + [node.feats[feats]]))
     print(morph_feats)
