@@ -262,7 +262,6 @@ class MSTParserLSTMModel(nn.Module):
                 evec = self.elookup(scalar(int(self.extrnd.get(entry.form, self.extrnd.get(entry.norm,
                                                                                        0))))) if self.external_embedding is not None else None
             entry.vec = cat([wordvec, posvec, evec, morph_vec])
-
             entry.lstms = [entry.vec, entry.vec]
             entry.headfov = None
             entry.modfov = None
